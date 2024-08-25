@@ -11,8 +11,8 @@ describe('getDefaultRoomAllocation', () => {
 			{ roomPrice: 500, adultPrice: 300, childPrice: 200, capacity: 4 },
 		];
 		const expected = [
-			{ adult: 3, child: 1, price: 2000 },
-			{ adult: 1, child: 1, price: 1000 },
+			{ adult: 2, child: 0, price: 1000, roomIndex: 1 },
+			{ adult: 2, child: 2, price: 1500, roomIndex: 2 },
 		];
 		expect(getDefaultRoomAllocation(guest, rooms)).toEqual(expected);
 	});
@@ -26,9 +26,9 @@ describe('getDefaultRoomAllocation', () => {
 			{ roomPrice: 500, adultPrice: 1000, childPrice: 600, capacity: 2 },
 		];
 		const expected = [
-			{ adult: 8, child: 0, price: 4000 },
-			{ adult: 4, child: 0, price: 2500 },
-			{ adult: 4, child: 0, price: 2500 },
+			{ adult: 4, child: 0, price: 2500, roomIndex: 0 },
+			{ adult: 4, child: 0, price: 2500, roomIndex: 1 },
+			{ adult: 8, child: 0, price: 4000, roomIndex: 2 },
 		];
 		expect(getDefaultRoomAllocation(guest, rooms)).toEqual(expected);
 	});

@@ -10,11 +10,12 @@ export interface Room {
 	capacity: number;
 }
 
-export interface AllocatedRoom {
+export type AllocatedRoom = {
 	adult: number;
 	child: number;
 	price: number;
-}
+	roomIndex: number;
+};
 
 export interface CustomInputNumberProps {
 	min: number;

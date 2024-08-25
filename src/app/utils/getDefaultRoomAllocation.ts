@@ -1,78 +1,88 @@
-import { Guest, Room, AllocatedRoom } from '../types/roomAllocation.types';
+import { AllocatedRoom, Guest, Room } from '../types/roomAllocation.types';
+
+type DPEntry = { allocation: AllocatedRoom[]; totalPrice: number };
 
 const getDefaultRoomAllocation = (
 	guest: Guest,
 	rooms: Room[]
 ): AllocatedRoom[] => {
 	const { adult, child } = guest;
-	const totalGuests = adult + child;
-	const sortedRooms = rooms.sort(
-		(a, b) =>
-			a.roomPrice +
-			a.adultPrice +
-			a.childPrice -
-			(b.roomPrice + b.adultPrice + b.childPrice)
-	);
+	const dp: Map<string, DPEntry> = new Map();
 
-	const allocatedRooms: AllocatedRoom[] = [];
-	let remainingAdults = adult;
-	let remainingChildren = child;
+	const helper = (
+		remainingAdults: number,
+		remainingChildren: number,
+		roomIndex: number
+	): DPEntry => {
+		if (remainingAdults === 0 && remainingChildren === 0)
+			return { allocation: [], totalPrice: 0 };
+		if (roomIndex >= rooms.length)
+			return { allocation: [], totalPrice: Infinity };
 
-	// check if the total capacity of the rooms is enough for the guests
-	const totalCapacity = rooms.reduce((acc, room) => acc + room.capacity, 0);
-	if (totalCapacity < totalGuests) {
-		return [];
-	}
+		const key = `${remainingAdults}-${remainingChildren}-${roomIndex}`;
+		if (dp.has(key)) return dp.get(key)!;
 
-	for (const room of sortedRooms) {
-		if (remainingAdults === 0 && remainingChildren === 0) break;
+		const room = rooms[roomIndex];
+		let bestAllocation: DPEntry = { allocation: [], totalPrice: Infinity };
 
-		// when the number of children is greater than 0, at least one adult is needed
-		let maxAdults = room.capacity - (remainingChildren > 0 ? 1 : 0);
-		let allocatedAdults = Math.min(remainingAdults, maxAdults);
-		let allocatedChildren = Math.min(
-			remainingChildren,
-			room.capacity - allocatedAdults
-		);
+		for (
+			let adults = 0;
+			adults <= Math.min(remainingAdults, room.capacity);
+			adults++
+		) {
+			for (
+				let children = 0;
+				children <= Math.min(remainingChildren, room.capacity - adults);
+				children++
+			) {
+				if (children > 0 && adults === 0) continue; // At least one adult must be with children
 
-		// if there are children but no adults are allocated, and there are remaining adults
-		if (allocatedChildren > 0 && allocatedAdults === 0) {
-			if (remainingAdults > 0) {
-				allocatedAdults = 1; // allocate at least one adult
-				allocatedChildren = Math.min(
-					remainingChildren,
-					room.capacity - allocatedAdults
+				const roomPrice =
+					room.roomPrice +
+					room.adultPrice * adults +
+					room.childPrice * children;
+				const next = helper(
+					remainingAdults - adults,
+					remainingChildren - children,
+					roomIndex + 1
 				);
-			} else {
-				// there are no remaining adults, but we need an adult to allocate the children, skip this room
-				continue;
+
+				if (next.totalPrice < Infinity) {
+					const currentPrice = roomPrice + next.totalPrice;
+					if (currentPrice < bestAllocation.totalPrice) {
+						bestAllocation = {
+							allocation: [
+								{
+									adult: adults,
+									child: children,
+									price: roomPrice,
+									roomIndex: roomIndex,
+								},
+								...next.allocation,
+							],
+							totalPrice: currentPrice,
+						};
+					}
+				}
 			}
 		}
 
-		if (allocatedAdults + allocatedChildren > room.capacity) {
-			continue; // if the number of allocated adults and children exceeds the room capacity, skip this room
+		// Also consider skipping the current room
+		const skipCurrent = helper(
+			remainingAdults,
+			remainingChildren,
+			roomIndex + 1
+		);
+		if (skipCurrent.totalPrice < bestAllocation.totalPrice) {
+			bestAllocation = skipCurrent;
 		}
 
-		const roomPrice =
-			room.roomPrice +
-			room.adultPrice * allocatedAdults +
-			room.childPrice * allocatedChildren;
+		dp.set(key, bestAllocation);
+		return bestAllocation;
+	};
 
-		allocatedRooms.push({
-			adult: allocatedAdults,
-			child: allocatedChildren,
-			price: roomPrice,
-		});
-
-		remainingAdults -= allocatedAdults;
-		remainingChildren -= allocatedChildren;
-	}
-
-	if (remainingAdults > 0 || remainingChildren > 0) {
-		return [];
-	}
-
-	return allocatedRooms;
+	const result = helper(adult, child, 0);
+	return result.totalPrice === Infinity ? [] : result.allocation;
 };
 
 export default getDefaultRoomAllocation;

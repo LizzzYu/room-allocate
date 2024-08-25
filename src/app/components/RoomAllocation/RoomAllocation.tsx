@@ -62,43 +62,47 @@ const RoomAllocation: React.FC<RoomAllocationProps> = ({
 
 	const handleRoomChange = useCallback(
 		(index: number, event: ChangeEvent<HTMLInputElement>) => {
-			const updatedRooms = [...allocatedRooms];
-			const previousRoom = updatedRooms[index];
+			setAllocatedRooms((prevRooms) => {
+				const updatedRooms = [...prevRooms];
+				const previousRoom = updatedRooms[index];
 
-			const { name, value } = event.target;
-			const numericValue = Number(value);
+				const { name, value } = event.target;
+				const numericValue = Number(value);
 
-			// Update allocated rooms
-			if (name?.includes('adult')) {
-				updatedRooms[index] = { ...previousRoom, adult: numericValue };
-			} else if (name?.includes('child')) {
-				updatedRooms[index] = { ...previousRoom, child: numericValue };
-			}
+				// update the adult and child number
+				if (name?.includes('adult')) {
+					updatedRooms[index] = { ...previousRoom, adult: numericValue };
+				} else if (name?.includes('child')) {
+					updatedRooms[index] = { ...previousRoom, child: numericValue };
+				}
 
-			// Recalculate price for the room
-			const room = rooms[index];
-			const newPrice =
-				room.roomPrice +
-				room.adultPrice * updatedRooms[index].adult +
-				room.childPrice * updatedRooms[index].child;
-			updatedRooms[index].price = newPrice;
+				// use remained room index to recalculate the price
+				const room = rooms[previousRoom.roomIndex];
+				const newPrice =
+					room.roomPrice +
+					room.adultPrice * updatedRooms[index].adult +
+					room.childPrice * updatedRooms[index].child;
+				updatedRooms[index].price = newPrice;
 
-			// count unallocated adults and children
-			const totalAdults = updatedRooms.reduce(
-				(sum, room) => sum + room.adult,
-				0
-			);
-			const totalChildren = updatedRooms.reduce(
-				(sum, room) => sum + room.child,
-				0
-			);
+				// calculate the remaining adults and children
+				const totalAdults = updatedRooms.reduce(
+					(sum, room) => sum + room.adult,
+					0
+				);
+				const totalChildren = updatedRooms.reduce(
+					(sum, room) => sum + room.child,
+					0
+				);
 
-			if (totalAdults <= guest.adult && totalChildren <= guest.child) {
-				setAllocatedRooms(updatedRooms);
-				onChange(updatedRooms);
-			}
+				if (totalAdults <= guest.adult && totalChildren <= guest.child) {
+					onChange(updatedRooms);
+					return updatedRooms;
+				}
+
+				return prevRooms;
+			});
 		},
-		[allocatedRooms, guest.adult, guest.child, onChange, rooms]
+		[guest.adult, guest.child, onChange, rooms]
 	);
 
 	return (
