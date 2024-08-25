@@ -75,6 +75,14 @@ const RoomAllocation: React.FC<RoomAllocationProps> = ({
 				updatedRooms[index] = { ...previousRoom, child: numericValue };
 			}
 
+			// Recalculate price for the room
+			const room = rooms[index];
+			const newPrice =
+				room.roomPrice +
+				room.adultPrice * updatedRooms[index].adult +
+				room.childPrice * updatedRooms[index].child;
+			updatedRooms[index].price = newPrice;
+
 			// count unallocated adults and children
 			const totalAdults = updatedRooms.reduce(
 				(sum, room) => sum + room.adult,
@@ -90,7 +98,7 @@ const RoomAllocation: React.FC<RoomAllocationProps> = ({
 				onChange(updatedRooms);
 			}
 		},
-		[allocatedRooms, guest.adult, guest.child, onChange]
+		[allocatedRooms, guest.adult, guest.child, onChange, rooms]
 	);
 
 	return (
