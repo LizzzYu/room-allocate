@@ -1,6 +1,10 @@
-# Room Allocation Project
+# Room Allocation
 
-This project is a React-based application for managing room allocations for guests. It includes custom input components, dynamic room allocation logic, and responsive UI design.
+Room allocation interface built with Next.js 14, React 18, TypeScript, and styled-components, featuring dynamic allocation logic and unit tests.
+
+**Tech Stack:** Next.js 14, React 18, TypeScript, styled-components, Jest
+
+![Room Allocation Screenshot](image.png)
 
 ## Table of Contents
 
@@ -15,7 +19,7 @@ This project is a React-based application for managing room allocations for gues
 
 ## Introduction
 
-The Room Allocation Project is designed to help hotel managers or similar businesses to allocate rooms for guests dynamically based on availability and guest count. The application is built with Next.js, React, and styled-components.
+Room Allocation is an interactive interface for dynamically distributing adults and children across available rooms based on guest counts, room capacity, and pricing constraints.
 
 ## Features
 
@@ -53,7 +57,7 @@ To get started with this project, follow these steps:
 
    ```bash
    http://localhost:3000
-   ```  
+   ```
 
 5. **Build the project:**
 
@@ -65,12 +69,6 @@ To get started with this project, follow these steps:
 
    ```bash
    npm run test
-   ```
-
-7. **Open your browser and visit:**
-
-   ```bash
-   http://localhost:3000
    ```
 
 ## Usage
@@ -136,6 +134,3 @@ export const colors = {
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
-
-
-
